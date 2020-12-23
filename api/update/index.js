@@ -36,7 +36,7 @@ const OS = new Set([DARWIN, WINDOWS, LINUX])
 const TYPES = new Set([ARCHIVE, SYSTEM, USER])
 const ARCH = new Set([IA32, X64])
 
-const VERSION_BASE_URL = 'https://raw.githubusercontent.com/VSCodium/versions/master'
+const VERSION_BASE_URL = 'https://raw.githubusercontent.com/zokugun/MrCode-versions/master'
 
 async function getJSON ({ os, arch, type }) {
   // get os/arch/type specific JSON file from a repo where these files are stored
