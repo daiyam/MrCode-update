@@ -18,31 +18,33 @@ the commit hash in the url parameter matches the "version" identifier in the abo
 const { parse } = require('url')
 const got = require('got')
 
+const INSIDER = 'insider'
 const STABLE = 'stable'
 
 const DARWIN = 'darwin'
 const WINDOWS = 'win32'
 const LINUX = 'linux'
 
+const ARM64 = 'arm64'
 const IA32 = 'ia32'
 const X64 = 'x64'
 
 const SYSTEM = 'system'
 const ARCHIVE = 'archive'
+const MSI = 'msi'
 const USER = 'user'
 
-const QUALITIES = new Set([STABLE])
+const QUALITIES = new Set([INSIDER, STABLE])
 const OS = new Set([DARWIN, WINDOWS, LINUX])
-const TYPES = new Set([ARCHIVE, SYSTEM, USER])
-const ARCH = new Set([IA32, X64])
+const TYPES = new Set([ARCHIVE, MSI, USER, SYSTEM])
+const ARCH = new Set([ARM64, IA32, X64])
 
 const VERSION_BASE_URL = 'https://raw.githubusercontent.com/zokugun/MrCode-versions/master'
 
-async function getJSON ({ os, arch, type }) {
+async function getJSON ({ quality, os, arch, type }) {
   // get os/arch/type specific JSON file from a repo where these files are stored
-  let versionUrl = `${VERSION_BASE_URL}/${os}`
+  let versionUrl = `${VERSION_BASE_URL}/${quality}/${os}/${arch}`
 
-  if (arch) versionUrl += `/${arch}`
   if (type) versionUrl += `/${type}`
 
   try {
@@ -79,7 +81,7 @@ function validateInput (platform, quality) {
 
   if (!ARCH.has(arch)) return false
 
-  return { os, arch, type }
+  return { quality, os, arch, type }
 }
 
 module.exports = async (req, res) => {
@@ -92,8 +94,7 @@ module.exports = async (req, res) => {
     return
   }
 
-  const { os, arch, type } = input
-  const latest = await getJSON({ os, arch, type })
+  const latest = await getJSON(input)
 
   // vercel supports cache-control header; we can use this to cut down on cost
   // currently set to cache for 4hrs
